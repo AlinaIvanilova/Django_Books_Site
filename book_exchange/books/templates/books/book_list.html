@@ -1,0 +1,17 @@
+{% extends 'books/base.html' %}
+
+{% block content %}
+<h2>Список книг</h2>
+{% for book in books %}
+    <div>
+        <h3>{{ book.title }} — {{ book.author }}</h3>
+        {% if book.image %}
+            <img src="{{ book.image.url }}" width="100">
+        {% endif %}
+        <p>{{ book.description }}</p>
+        <small>Додав: {{ book.owner }}</small>
+    </div>
+{% empty %}
+    <p>Немає жодної книги :(</p>
+{% endfor %}
+{% endblock %}
