@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required
 
-from .models import Book
-from .forms import BookForm
+from .models import Book, ExchangeProposal
+from .forms import BookForm, ExchangeProposalForm
 
 # 📚 Перегляд списку книг
 def book_list(request):
@@ -53,3 +53,46 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('book_list')
+
+# 🔄 Пропозиція обміну книги
+@login_required
+def propose_exchange(request, book_id):
+    requested_book = get_object_or_404(Book, id=book_id)
+
+    # Не дозволяти обмінювати свої власні книги
+    if requested_book.owner == request.user:
+        return redirect('book_list')
+
+    if request.method == 'POST':
+        form = ExchangeProposalForm(request.POST, user=request.user)
+        if form.is_valid():
+            proposal = form.save(commit=False)
+            proposal.from_user = request.user
+            proposal.to_user = requested_book.owner
+            proposal.requested_book = requested_book
+            proposal.save()
+            return redirect('book_list')
+    else:
+        form = ExchangeProposalForm(user=request.user)
+
+    return render(request, 'books/propose_exchange.html', {
+        'form': form,
+        'requested_book': requested_book
+    })
+
+# 📜 Перегляд отриманих пропозицій
+@login_required
+def received_proposals(request):
+    proposals = ExchangeProposal.objects.filter(to_user=request.user)
+    return render(request, 'books/received_proposals.html', {'proposals': proposals})
+
+# ✅ Відповідь на пропозицію (прийняти або відхилити)
+@login_required
+def respond_to_proposal(request, proposal_id, action):
+    proposal = get_object_or_404(ExchangeProposal, id=proposal_id, to_user=request.user)
+    if action == 'accept':
+        proposal.status = 'accepted'
+    elif action == 'reject':
+        proposal.status = 'rejected'
+    proposal.save()
+    return redirect('received_proposals')  # Повернення до списку пропозицій

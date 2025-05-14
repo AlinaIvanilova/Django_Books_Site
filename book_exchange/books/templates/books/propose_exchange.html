@@ -1,0 +1,13 @@
+{% extends 'books/base.html' %}
+
+{% block content %}
+<h2>Пропозиція обміну книги</h2>
+
+<p>Ви пропонуєте обмін книги "{{ requested_book.title }}" від {{ requested_book.owner }}.</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Надіслати пропозицію</button>
+</form>
+{% endblock %}

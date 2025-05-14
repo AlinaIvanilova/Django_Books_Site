@@ -9,8 +9,14 @@
             <img src="{{ book.image.url }}" width="100">
         {% endif %}
         <p>{{ book.description }}</p>
-        <small>Додав: {{ book.owner }}</small>
+        <small>Додав: {{ book.owner }}</small><br>
+
+        {# КНОПКА ОБМІНУ — лише для авторизованих і не на свої книги #}
+        {% if user.is_authenticated and book.owner != user %}
+            <a href="{% url 'propose_exchange' book.id %}">Запропонувати обмін</a>
+        {% endif %}
     </div>
+    <hr>
 {% empty %}
     <p>Немає жодної книги :(</p>
 {% endfor %}

@@ -1,0 +1,21 @@
+{% extends 'books/base.html' %}
+
+{% block content %}
+<h2>Отримані пропозиції обміну</h2>
+{% for proposal in proposals %}
+    <div>
+        <p>{{ proposal.requested_book.title }} — {{ proposal.requested_book.author }}</p>
+        <p>Пропозиція від: {{ proposal.from_user }}</p>
+        <p>Статус: {{ proposal.status }}</p>
+
+        {# Кнопки для відповіді на пропозицію #}
+        {% if proposal.status == 'pending' %}
+            <a href="{% url 'respond_to_proposal' proposal.id 'accept' %}">Прийняти</a>
+            <a href="{% url 'respond_to_proposal' proposal.id 'reject' %}">Відхилити</a>
+        {% endif %}
+    </div>
+    <hr>
+{% empty %}
+    <p>Немає пропозицій.</p>
+{% endfor %}
+{% endblock %}
