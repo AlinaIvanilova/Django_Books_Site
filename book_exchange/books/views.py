@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from .models import Book, ExchangeProposal
 from .forms import BookForm, ExchangeProposalForm
@@ -71,6 +72,10 @@ def propose_exchange(request, book_id):
             proposal.to_user = requested_book.owner
             proposal.requested_book = requested_book
             proposal.save()
+
+            # ✅ Повідомлення про успішну відправку пропозиції
+            messages.success(request, "Пропозиція обміну успішно надіслана!")
+
             return redirect('book_list')
     else:
         form = ExchangeProposalForm(user=request.user)
@@ -83,16 +88,18 @@ def propose_exchange(request, book_id):
 # 📜 Перегляд отриманих пропозицій
 @login_required
 def received_proposals(request):
-    proposals = ExchangeProposal.objects.filter(to_user=request.user)
+    proposals = ExchangeProposal.objects.filter(to_user=request.user, status='pending')
     return render(request, 'books/received_proposals.html', {'proposals': proposals})
 
 # ✅ Відповідь на пропозицію (прийняти або відхилити)
 @login_required
 def respond_to_proposal(request, proposal_id, action):
     proposal = get_object_or_404(ExchangeProposal, id=proposal_id, to_user=request.user)
+
     if action == 'accept':
         proposal.status = 'accepted'
     elif action == 'reject':
         proposal.status = 'rejected'
+
     proposal.save()
-    return redirect('received_proposals')  # Повернення до списку пропозицій
+    return redirect('received_proposals')

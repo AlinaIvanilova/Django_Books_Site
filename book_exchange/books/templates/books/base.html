@@ -9,6 +9,7 @@
         <a href="{% url 'book_list' %}">Всі книги</a>
         {% if user.is_authenticated %}
             <a href="{% url 'add_book' %}">Додати книгу</a>
+            <a href="{% url 'received_proposals' %}">Отримані пропозиції</a>
             Привіт, {{ user.username }} | <a href="{% url 'logout' %}">Вийти</a>
         {% else %}
             <a href="{% url 'login' %}">Увійти</a> | <a href="{% url 'signup' %}">Реєстрація</a>
@@ -16,7 +17,16 @@
     </nav>
     <hr>
 
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     {% block content %}
     {% endblock %}
 </body>
 </html>
+
