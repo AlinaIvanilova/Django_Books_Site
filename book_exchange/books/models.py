@@ -7,6 +7,7 @@ class Book(models.Model):
     author = models.CharField(max_length=200)
     image = models.ImageField(upload_to='book_images/', null=True, blank=True)
     description = models.TextField(blank=True)
+    is_exchanged = models.BooleanField(default=False)  # 🔹 Додано це поле
 
     def __str__(self):
         return f"{self.title} — {self.author}"

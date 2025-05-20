@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q  # ✅ Додано для фільтрації з OR
 
 from .models import Book, ExchangeProposal
 from .forms import BookForm, ExchangeProposalForm
@@ -60,8 +61,12 @@ def logout_view(request):
 def propose_exchange(request, book_id):
     requested_book = get_object_or_404(Book, id=book_id)
 
-    # Не дозволяти обмінювати свої власні книги
     if requested_book.owner == request.user:
+        messages.warning(request, "Ви не можете запропонувати обмін на власну книгу.")
+        return redirect('book_list')
+
+    if requested_book.is_exchanged:
+        messages.error(request, "Ця книга вже обміняна.")
         return redirect('book_list')
 
     if request.method == 'POST':
@@ -72,10 +77,7 @@ def propose_exchange(request, book_id):
             proposal.to_user = requested_book.owner
             proposal.requested_book = requested_book
             proposal.save()
-
-            # ✅ Повідомлення про успішну відправку пропозиції
-            messages.success(request, "Пропозиція обміну успішно надіслана!")
-
+            messages.success(request, "Пропозиція обміну надіслана!")
             return redirect('book_list')
     else:
         form = ExchangeProposalForm(user=request.user)
@@ -98,8 +100,28 @@ def respond_to_proposal(request, proposal_id, action):
 
     if action == 'accept':
         proposal.status = 'accepted'
+        proposal.save()
+
+        # 🔹 Помічаємо книги як обміняні
+        proposal.offered_book.is_exchanged = True
+        proposal.offered_book.save()
+
+        proposal.requested_book.is_exchanged = True
+        proposal.requested_book.save()
+
+        # 🔸 Відхиляємо всі інші пропозиції, пов'язані з цими книгами
+        ExchangeProposal.objects.filter(
+            status='pending'
+        ).filter(
+            Q(offered_book=proposal.offered_book) | Q(requested_book=proposal.offered_book) |
+            Q(offered_book=proposal.requested_book) | Q(requested_book=proposal.requested_book)
+        ).exclude(id=proposal.id).update(status='rejected')
+
+        messages.success(request, "Обмін прийнято!")
+
     elif action == 'reject':
         proposal.status = 'rejected'
+        proposal.save()
+        messages.info(request, "Пропозицію відхилено.")
 
-    proposal.save()
     return redirect('received_proposals')
