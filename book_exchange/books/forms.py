@@ -4,7 +4,7 @@ from .models import Book, ExchangeProposal
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
-        fields = ['title', 'author', 'image', 'description']
+        fields = ['title', 'author', 'image', 'description', 'category']
 
 class ExchangeProposalForm(forms.ModelForm):
     class Meta:

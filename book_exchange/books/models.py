@@ -2,12 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Book(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='book_images/', null=True, blank=True)
-    description = models.TextField(blank=True)
-    is_exchanged = models.BooleanField(default=False)  # 🔹 Додано це поле
+    description = models.TextField()
+    image = models.ImageField(upload_to='book_images/', blank=True, null=True)
+    category = models.CharField(max_length=100, blank=True)  # 🆕 ДОДАНО ПОЛЕ
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_exchanged = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.title} — {self.author}"

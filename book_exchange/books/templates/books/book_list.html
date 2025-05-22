@@ -5,9 +5,13 @@
 {% for book in books %}
     <div>
         <h3>{{ book.title }} — {{ book.author }}</h3>
+
+        <p><strong>Категорія:</strong> {{ book.category }}</p>  {# ✅ додано тут #}
+
         {% if book.image %}
             <img src="{{ book.image.url }}" width="100">
         {% endif %}
+
         <p>{{ book.description }}</p>
         <small>Додав: {{ book.owner }}</small><br>
 
@@ -21,7 +25,6 @@
             <a href="{% url 'update_book' book.id %}">Редагувати</a>
             <a href="{% url 'delete_book' book.id %}">Видалити</a>
         {% endif %}
-
     </div>
     <hr>
 {% empty %}
