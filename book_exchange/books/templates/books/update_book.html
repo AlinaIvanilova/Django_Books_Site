@@ -1,0 +1,10 @@
+{% extends "books/base.html" %}
+{% block content %}
+  <h2>Редагувати книгу</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Зберегти зміни</button>
+  </form>
+  <a href="{% url 'book_list' %}">Назад до списку</a>
+{% endblock %}

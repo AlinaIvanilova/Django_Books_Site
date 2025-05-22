@@ -125,3 +125,32 @@ def respond_to_proposal(request, proposal_id, action):
         messages.info(request, "Пропозицію відхилено.")
 
     return redirect('received_proposals')
+
+
+# ✏️ Оновлення книги
+@login_required
+def update_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id, owner=request.user)
+
+    if request.method == 'POST':
+        form = BookForm(request.POST, request.FILES, instance=book)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Книгу оновлено.")
+            return redirect('book_list')
+    else:
+        form = BookForm(instance=book)
+
+    return render(request, 'books/update_book.html', {'form': form, 'book': book})
+
+# ❌ Видалення книги
+@login_required
+def delete_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id, owner=request.user)
+
+    if request.method == 'POST':
+        book.delete()
+        messages.success(request, "Книгу видалено.")
+        return redirect('book_list')
+
+    return render(request, 'books/delete_book.html', {'book': book})

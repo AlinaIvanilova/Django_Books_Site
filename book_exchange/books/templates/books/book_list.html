@@ -16,6 +16,12 @@
         {% elif user.is_authenticated and book.owner != user %}
             <a href="{% url 'propose_exchange' book.id %}">Запропонувати обмін</a>
         {% endif %}
+
+        {% if book.owner == user %}
+            <a href="{% url 'update_book' book.id %}">Редагувати</a>
+            <a href="{% url 'delete_book' book.id %}">Видалити</a>
+        {% endif %}
+
     </div>
     <hr>
 {% empty %}
