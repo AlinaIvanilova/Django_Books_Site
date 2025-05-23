@@ -8,12 +8,12 @@ from django.db.models import Q  # ✅ Додано для фільтрації �
 from .models import Book, ExchangeProposal
 from .forms import BookForm, ExchangeProposalForm
 
-# 📚 Перегляд списку книг
+# Перегляд списку книг
 def book_list(request):
     books = Book.objects.all()
     return render(request, 'books/book_list.html', {'books': books})
 
-# ➕ Додавання книги (лише для авторизованих)
+# Додавання книги (лише для авторизованих)
 @login_required
 def add_book(request):
     if request.method == 'POST':
@@ -27,7 +27,7 @@ def add_book(request):
         form = BookForm()
     return render(request, 'books/add_book.html', {'form': form})
 
-# 🔐 Реєстрація користувача
+# Реєстрація користувача
 def signup_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -39,7 +39,7 @@ def signup_view(request):
         form = UserCreationForm()
     return render(request, 'books/signup.html', {'form': form})
 
-# 🔑 Вхід користувача
+# Вхід користувача
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -51,12 +51,12 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'books/login.html', {'form': form})
 
-# 🚪 Вихід користувача
+# Вихід користувача
 def logout_view(request):
     logout(request)
     return redirect('book_list')
 
-# 🔄 Пропозиція обміну книги
+# Пропозиція обміну книги
 @login_required
 def propose_exchange(request, book_id):
     requested_book = get_object_or_404(Book, id=book_id)
@@ -87,13 +87,13 @@ def propose_exchange(request, book_id):
         'requested_book': requested_book
     })
 
-# 📜 Перегляд отриманих пропозицій
+# Перегляд отриманих пропозицій
 @login_required
 def received_proposals(request):
     proposals = ExchangeProposal.objects.filter(to_user=request.user, status='pending')
     return render(request, 'books/received_proposals.html', {'proposals': proposals})
 
-# ✅ Відповідь на пропозицію (прийняти або відхилити)
+# Відповідь на пропозицію (прийняти або відхилити)
 @login_required
 def respond_to_proposal(request, proposal_id, action):
     proposal = get_object_or_404(ExchangeProposal, id=proposal_id, to_user=request.user)
@@ -102,14 +102,14 @@ def respond_to_proposal(request, proposal_id, action):
         proposal.status = 'accepted'
         proposal.save()
 
-        # 🔹 Помічаємо книги як обміняні
+        # Помічаємо книги як обміняні
         proposal.offered_book.is_exchanged = True
         proposal.offered_book.save()
 
         proposal.requested_book.is_exchanged = True
         proposal.requested_book.save()
 
-        # 🔸 Відхиляємо всі інші пропозиції, пов'язані з цими книгами
+        # Відхиляємо всі інші пропозиції, пов'язані з цими книгами
         ExchangeProposal.objects.filter(
             status='pending'
         ).filter(
@@ -127,7 +127,7 @@ def respond_to_proposal(request, proposal_id, action):
     return redirect('received_proposals')
 
 
-# ✏️ Оновлення книги
+# Оновлення книги
 @login_required
 def update_book(request, book_id):
     book = get_object_or_404(Book, id=book_id, owner=request.user)
@@ -143,7 +143,7 @@ def update_book(request, book_id):
 
     return render(request, 'books/update_book.html', {'form': form, 'book': book})
 
-# ❌ Видалення книги
+# Видалення книги
 @login_required
 def delete_book(request, book_id):
     book = get_object_or_404(Book, id=book_id, owner=request.user)
